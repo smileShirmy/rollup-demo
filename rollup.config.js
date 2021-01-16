@@ -1,6 +1,8 @@
 import commonjs from '@rollup/plugin-commonjs';
-import resolve from '@rollup/plugin-node-resolve';
+import nodeResolve from '@rollup/plugin-node-resolve';
 import babel from '@rollup/plugin-babel';
+import path from 'path';
+import { terser } from 'rollup-plugin-terser';
 
 const extensions = ['.js', '.jsx', '.ts', '.tsx'];
 
@@ -19,6 +21,10 @@ const buildType = [
   }
 ];
 
+function resolve(p) {
+  return path.resolve(__dirname, './', p);
+}
+
 function PascalCase(str) {
   const re = /-(\w)/g;
   const newStr = str.replace(re, function (match, group1) {
@@ -27,15 +33,27 @@ function PascalCase(str) {
   return newStr.charAt(0).toUpperCase() + newStr.slice(1);
 }
 
+const generateBanner = (packageName) => {
+  let ret = `/*!
+ * @ava/${packageName}
+ * (c) 2020-${new Date().getFullYear()} AVA Frontend Team
+ */`;
+  return ret;
+};
+
+const name = 'entry';
+
 export default {
-  input: 'src/entry.ts', // These are set in the exec() call
-  output: {
-    file: 'dist/output.js', // These are set in the exec() call
-    format: 'es',
-    strict: false
-  },
+  input: `src/${name}.ts`,
+  output: buildType.map((type) => ({
+    file: resolve(`dist/${name}${type.ext}`),
+    name: PascalCase(name),
+    format: type.format,
+    banner: generateBanner(name)
+  })),
   plugins: [
-    resolve({
+    terser(),
+    nodeResolve({
       extensions,
       browser: true
     }),
