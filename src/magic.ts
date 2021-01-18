@@ -1,3 +1,16 @@
-const a = '123'
+class Person {
+  name: string = '';
 
-export default a
+  constructor(name: string) {
+    this.name = name;
+  }
+
+  getName() {
+    return this.name;
+  }
+}
+
+const person = new Person('name');
+const name = person.getName();
+
+export default name;
